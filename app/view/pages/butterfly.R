@@ -1,13 +1,22 @@
 box::use(
-  shiny[fluidRow, column, withMathJax, reactive, req, debounce, NS, p, moduleServer],
-  shinydashboard[box],
-  shiny.fluent[Slider.shinyInput],
-  plotly[plotlyOutput, renderPlotly, plot_ly],
-  deSolve[ode],
-  tibble[tibble],
-  dplyr[`%>%`]
+  shiny[fluidRow, column, withMathJax, reactive, req, debounce, NS, p, moduleServer,],
+  shinydashboard[box,],
+  shiny.fluent[Slider.shinyInput,],
+  plotly[plotlyOutput, renderPlotly, plot_ly,],
+  deSolve[ode,],
+  tibble[tibble,],
+  dplyr[`%>%`,],
 )
 
+lorenz <- function(t, state, parameters) {
+  with(as.list(c(state, parameters)),{
+    dX <- a*X + Y*Z
+    dY <- b*(Y-Z)
+    dZ <- -X*Y + c*Y - Z
+    
+    list(c(dX, dY, dZ))
+  })
+}
 
 
 butterfly_formula <-"$$
@@ -61,11 +70,11 @@ server <- function(id) {
                              c = input$c))
     
     state <- reactive({
-      print('State changed')
       c(X = input$x,
         Y = input$y,
         Z = input$z)
       })
+    
     times <- reactive({
       req(input$T)
       req(input$log_dt)
@@ -78,15 +87,13 @@ server <- function(id) {
       req(parameters())
       out <- ode(y = state(), times = times(), func = lorenz, parms = parameters())
       tibble(t = out[,1], x = out[,2], y = out[,3], z = out[,4], frame = 1:length(out[,1]) )
-    })  %>% debounce(100)
+    }) %>% debounce(100)
     
     output$out <- renderPlotly({
-      print('plotly rendered')
       plot_ly(tbl(), x = ~x, y = ~y, z = ~z, color = ~t, type = 'scatter3d', mode = 'lines',
               opacity = 1, line = list(width = 6))
     })
-    
-    tbl
+
   })
 }
 

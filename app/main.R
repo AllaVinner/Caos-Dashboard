@@ -1,14 +1,15 @@
 box::use(
-  shiny[bootstrapPage, moduleServer, NS, renderText, tags, textOutput, icon, observeEvent],
-  shinydashboard[dashboardPage, dashboardHeader, dashboardSidebar, sidebarMenu, menuItem, tabItems, tabItem, dashboardBody]
+  shiny[bootstrapPage, moduleServer, NS, renderText, tags, textOutput, icon, observeEvent,],
+  shinydashboard[dashboardPage, dashboardHeader, dashboardSidebar, sidebarMenu, menuItem, tabItems, tabItem, dashboardBody,],
 )
 
 box::use(
-  app/view/page_butterfly
+  app/view/pages/butterfly
 )
 
 #' @export
 ui <- function(id) {
+  ns <- NS(id)
   dashboardPage(
     dashboardHeader(title = 'My Dashboard'),
     dashboardSidebar(
@@ -19,7 +20,7 @@ ui <- function(id) {
     ),
     dashboardBody(
       tabItems(
-        tabItem(tabName = 'butterfly', page_butterfly$ui('butterfly'))
+        tabItem(tabName = 'butterfly', butterfly$ui(ns('butterfly')))
       )
     )
   )
@@ -29,7 +30,6 @@ ui <- function(id) {
 #' @export
 server <- function(id) {
   moduleServer(id, function(input, output, session) {
-    tbl <- page_butterfly$server('butterfly')
-    observeEvent(tbl(), print('TBL calced'))
+    butterfly$server('butterfly')
   })
 }
